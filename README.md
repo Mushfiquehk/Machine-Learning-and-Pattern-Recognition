@@ -1,2 +1,2 @@
 # ML & PR
-Machine Learning and Pattern Recognition Academic Projects
+Machine Learning and Pattern Recognition course projects
