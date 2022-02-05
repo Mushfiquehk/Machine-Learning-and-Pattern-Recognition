@@ -12,9 +12,9 @@ def J(weight, design, target):
                X: design matrix 406,2 (NXD+1)
                t: target vector 406,1 (NX1)
         Output: gradient with respect to W  1,2 (1XD+1) 
-        gradient of J = W^T.X^T.X - t^T.X 
+        gradient of J with respect to W = 2W^T.X^T.X - 2t^T.X (from notes)
         (with respect to W)"""
-    return weight.T.dot(design.T.dot(design)) - target.T.dot(design)
+    return 2*weight.T.dot(design.T.dot(design)) - 2*target.T.dot(design)
 
 # Enter filename here
 filepath = "proj1Dataset.xlsx"
@@ -31,10 +31,11 @@ design_matrix = np.hstack((features, X0))
 
 t = df['Horsepower']
 t = pd.DataFrame(t, columns=["Horsepower"])
-t = t.fillna(0)
+t = t.fillna(int(df['Horsepower'].mean()))
 
 # Closed form solution
 
+# W = (X^T.X)^-1.X^T.t
 W = (np.linalg.pinv(design_matrix))@t
 Y = design_matrix@W
 
@@ -45,10 +46,13 @@ y_cf_plot = plt.plot(df['Weight'], Y, c='b',label='Closed Form')
 y_cf_plot = plt.legend(loc='upper right')
 y_cf_plot = plt.title("Matlab's 'carbig' dataset")
 y_cf_plot = plt.savefig("Closed Form.jpg")
+plt.show()
 
 # Gradient Descent Section
 
-np.random.seed(33)
+np.random.seed(44)
+# Adjust learning rate (must be <10^-8) and 
+# number of iterations gradient descent will run for
 learning_rate = 0.0000000001
 num_iterations = 5000
 
@@ -68,3 +72,4 @@ y_gd_plot = plt.plot(df['Weight'], Y_GD, c='g',label='Gradient Descent')
 y_gd_plot = plt.legend(loc='upper right')
 y_gd_plot = plt.title("Matlab's 'carbig' dataset")
 y_gd_plot = plt.savefig("Gradient Descent.jpg")
+plt.show()
