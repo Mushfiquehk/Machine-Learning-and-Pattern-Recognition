@@ -49,44 +49,52 @@ for image in labelled_images:
 x = np.array(x).reshape(len(x), 10201)
 x = np.hstack((x, np.ones((len(x), 1))))
 
+train_size = 9000
+
+x_train = x[:train_size,:]
+x_test = x[train_size:,:]
+x_train.shape
+t_train = t[:train_size,:]
+t_test = t[train_size:,:]
+
 # change these values to change training time
 phi = 0.0001
 max_iter = 10000
-n = x.shape[0] # num samples
-m = x.shape[1] # num measurements per sample
 k = W.shape[1] # num classes
 for _ in range(max_iter):
     # error = -(1 / m) * (np.dot(t.T, np.log(y)) + np.dot((1 - t).T, np.log(1 - y)))
-    a = np.dot(x, W)
-    y = softmax(a, axis=1)
+    a = np.dot(x_train, W)
+    y_train = softmax(a, axis=1)
     for j in range(k):
         sum_error_gradient = 0
-        sum_error_gradient = np.dot((y[:,j] - t[:,j]), x)
+        sum_error_gradient = np.dot((y_train[:,j] - t_train[:,j]), x_train)
+        if sum_error_gradient.all() < 10e-6:
+            break
         error = sum_error_gradient.reshape(10202,1)
         W[:, j:j+1] = W[:, j:j+1] - (phi * error)
 
-y = softmax(np.dot(x, W), axis=1)
+y_test = softmax(np.dot(x_test, W), axis=1)
 
 y_pred = np.array([9,9])
-for preds in y:
+for preds in y_test:
     index = np.argmax(preds)
     arr = np.zeros(len(preds))
     arr[index] = 1
     y_pred = np.vstack((y_pred, arr))
 y_pred = np.delete(y_pred, 0, axis=0)
 
-cf_matrix = multilabel_confusion_matrix(t, y_pred, labels=[False, True])
+cf_matrix = multilabel_confusion_matrix(t_test, y_pred, labels=[False, True])
 print(cf_matrix)
 
 # these 2 should be very similar
 print(y_pred)
-print(t)
+print(t_test)
 
 correct = 0
 for i, preds in enumerate(y_pred):
-    if np.array_equal(preds, t[i]):
+    if np.array_equal(preds, t_test[i]):
         correct += 1
 
-accuracy = (correct / 11000) * 100
+accuracy = (correct / 2000) * 100
 print("Accuracy: " + accuracy + "%")
 
